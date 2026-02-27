@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.github
+.gitignore
+.env*
+!.env.local.example
+*.md
+supabase
+.vscode
+.idea
+.DS_Store
+Dockerfile
+.dockerignore
+Makefile

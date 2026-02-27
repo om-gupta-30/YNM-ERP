@@ -1,0 +1,293 @@
+@import "tailwindcss";
+
+/* ─── Design tokens ───────────────────────────────────────────────────────── */
+
+:root {
+  --background: #faf9f7;
+  --foreground: #1c1917;
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+  --muted: #f5f3f0;
+  --muted-foreground: #57534e;
+  --border: #e7e5e4;
+  --ring: #d6d3d1;
+  --radius: 0.5rem;
+
+  --gold-50: #fefce8;
+  --gold-100: #fef9c3;
+  --gold-200: #fef08a;
+  --gold-300: #fde047;
+  --gold-400: #facc15;
+  --gold-500: #eab308;
+  --gold-600: #ca8a04;
+  --gold-700: #a16207;
+  --gold-800: #854d0e;
+  --gold-900: #713f12;
+  --gold-950: #422006;
+
+  --accent: var(--gold-500);
+  --accent-dark: var(--gold-700);
+  --accent-foreground: #422006;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-gold-50: var(--gold-50);
+  --color-gold-100: var(--gold-100);
+  --color-gold-200: var(--gold-200);
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --color-gold-700: var(--gold-700);
+  --color-gold-800: var(--gold-800);
+  --color-gold-900: var(--gold-900);
+  --color-gold-950: var(--gold-950);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.25); }
+  50%      { box-shadow: 0 0 0 6px rgba(234, 179, 8, 0); }
+}
+
+/* ─── Base layer ──────────────────────────────────────────────────────────── */
+
+@layer base {
+  html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-sm leading-relaxed text-stone-900 antialiased;
+  }
+
+  ::selection {
+    background: rgba(234, 179, 8, 0.18);
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-gold-400/60 ring-offset-2 ring-offset-white;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* ─── Component layer ─────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Layout primitives ────────────────────────────────────────────────── */
+
+  .ds-page {
+    @apply space-y-6;
+    animation: fade-in 0.3s ease-out;
+  }
+
+  .ds-surface {
+    @apply rounded-xl border border-stone-200/80 bg-white shadow-sm
+           transition-shadow duration-200 ease-out;
+  }
+
+  .ds-surface:hover {
+    @apply shadow-md;
+  }
+
+  .ds-surface-muted {
+    @apply rounded-xl border border-stone-100 bg-stone-50/60;
+  }
+
+  .ds-divider {
+    @apply border-t border-stone-200/60;
+  }
+
+  /* ── Typography scale ─────────────────────────────────────────────────── */
+
+  .ds-h1 {
+    @apply text-lg font-semibold tracking-tight text-stone-950 sm:text-xl;
+  }
+
+  .ds-h2 {
+    @apply text-base font-semibold text-stone-950;
+  }
+
+  .ds-h3 {
+    @apply text-sm font-semibold text-stone-900;
+  }
+
+  .ds-subtitle {
+    @apply text-[13px] leading-relaxed text-stone-500;
+  }
+
+  .ds-caption {
+    @apply text-xs text-stone-500;
+  }
+
+  .ds-overline {
+    @apply text-[11px] font-semibold uppercase tracking-wider text-stone-400;
+  }
+
+  /* ── Forms ────────────────────────────────────────────────────────────── */
+
+  .ds-label {
+    @apply block text-sm font-medium text-stone-700;
+  }
+
+  .ds-help {
+    @apply text-xs text-stone-500;
+  }
+
+  .ds-error {
+    @apply text-sm text-red-600;
+  }
+
+  .ds-input {
+    @apply h-9 w-full rounded-lg border border-stone-200 bg-white px-3 text-sm text-stone-900
+           shadow-[0_1px_2px_0_rgb(0_0_0/0.04)]
+           placeholder:text-stone-400
+           transition-all duration-200 ease-out
+           focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30 focus:shadow-none
+           disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-stone-500;
+  }
+
+  .ds-select {
+    @apply h-9 w-full appearance-none rounded-lg border border-stone-200 bg-white px-3 pr-8 text-sm text-stone-900
+           shadow-[0_1px_2px_0_rgb(0_0_0/0.04)]
+           placeholder:text-stone-400
+           transition-all duration-200 ease-out
+           focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30 focus:shadow-none
+           disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-stone-500;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2378716c' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.625rem center;
+    background-size: 0.75rem;
+  }
+
+  .ds-textarea {
+    @apply min-h-[6rem] w-full resize-y rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900
+           shadow-[0_1px_2px_0_rgb(0_0_0/0.04)]
+           placeholder:text-stone-400
+           transition-all duration-200 ease-out
+           focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30 focus:shadow-none
+           disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-stone-500;
+  }
+
+  .ds-input-error {
+    @apply border-red-300 focus:border-red-400 focus:ring-red-300/40;
+  }
+
+  .ds-field {
+    @apply space-y-1.5;
+  }
+
+  /* ── Tables ───────────────────────────────────────────────────────────── */
+
+  .ds-table-wrap {
+    @apply overflow-hidden rounded-xl border border-stone-200/80 bg-white shadow-sm;
+  }
+
+  .ds-table-scroll {
+    @apply overflow-x-auto;
+  }
+
+  .ds-table {
+    @apply min-w-full text-sm;
+  }
+
+  .ds-thead {
+    @apply border-b border-stone-200 bg-stone-50/80;
+  }
+
+  .ds-th {
+    @apply px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-stone-500;
+  }
+
+  .ds-td {
+    @apply px-4 py-2.5 align-middle text-stone-700;
+  }
+
+  .ds-tr {
+    @apply border-b border-stone-100 last:border-b-0
+           transition-colors duration-150
+           hover:bg-gold-50/40;
+  }
+
+  .ds-empty {
+    @apply px-4 py-10 text-center text-sm text-stone-400;
+  }
+
+  /* ── Filter bar ───────────────────────────────────────────────────────── */
+
+  .ds-filter-bar {
+    @apply rounded-xl border border-stone-200/80 bg-white p-4 shadow-sm;
+  }
+
+  /* ── Inline alert banners ─────────────────────────────────────────────── */
+
+  .ds-alert-error {
+    @apply rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700;
+  }
+
+  .ds-alert-warning {
+    @apply rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800;
+  }
+
+  .ds-alert-info {
+    @apply rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-700;
+  }
+
+  /* ── Skeleton shimmer ─────────────────────────────────────────────────── */
+
+  .ds-shimmer {
+    background: linear-gradient(90deg, #f5f5f4 25%, #e7e5e4 50%, #f5f5f4 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+/* ─── Print ───────────────────────────────────────────────────────────────── */
+
+@media print {
+  .ds-surface {
+    @apply shadow-none border-0;
+  }
+}
