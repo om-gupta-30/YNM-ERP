@@ -18,6 +18,7 @@ type AuthContextValue = {
   factory: FactoryCode | null;
   authError: string | null;
   login: (username: string, password: string) => Promise<void>;
+  signup: (params: { name: string; email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   setRole: (role: UserRole) => Promise<void>;
   setFactory: (factory: FactoryCode) => Promise<void>;
@@ -91,6 +92,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const signup = useCallback(
+    async ({ name, email, password }: { name: string; email: string; password: string }) => {
+      setIsLoading(true);
+      setAuthError(null);
+      try {
+        const user = await authService.signup(name, email, password);
+        const session = await authService.getSession();
+        setCurrentUser(toCurrentUser(user, session ?? undefined));
+      } catch (err) {
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
   const logout = useCallback(async () => {
     if (currentUser) {
       logAudit({
@@ -130,12 +148,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       factory: currentUser?.factory ?? null,
       authError,
       login,
+      signup,
       logout,
       setRole,
       setFactory,
       refresh,
     }),
-    [authError, currentUser, isLoading, login, logout, refresh, setFactory, setRole],
+    [authError, currentUser, isLoading, login, signup, logout, refresh, setFactory, setRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

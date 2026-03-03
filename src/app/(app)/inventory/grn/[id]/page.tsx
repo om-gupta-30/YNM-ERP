@@ -15,6 +15,8 @@ import { AccessDenied } from "@/components/ui/AccessDenied";
 import { can } from "@/lib/rbac";
 import { useToast } from "@/components/ui/Toast";
 import { KpiCard } from "@/components/ui/KpiCard";
+import { generateGrnPdf, type GrnPdfData } from "@/lib/generateGrnPdf";
+import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 
 export default function GrnDetailPage() {
   const params = useParams<{ id: string }>();
@@ -37,6 +39,7 @@ export default function GrnDetailPage() {
   const [lines, setLines] = React.useState<GRNItem[]>([]);
 
   const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = React.useState(false);
 
   const refresh = React.useCallback(async () => {
     setIsLoading(true);
@@ -127,6 +130,47 @@ export default function GrnDetailPage() {
     }
   }
 
+  async function onDownloadPdf() {
+    if (!grn) return;
+    setIsGeneratingPdf(true);
+    try {
+      let poItemRows: GrnPdfData["poItems"] = [];
+      if (grn.poId) {
+        const { data } = await getSupabaseBrowserClient()
+          .from("po_items")
+          .select("item_id, unit_price, tax_percent, total_amount")
+          .eq("po_id", grn.poId);
+        poItemRows = (data ?? []).map((r) => ({
+          itemId: r.item_id as string,
+          unitPrice: Number(r.unit_price ?? 0),
+          taxPercent: Number(r.tax_percent ?? 0),
+          totalAmount: Number(r.total_amount ?? 0),
+        }));
+      }
+
+      const pdfData: GrnPdfData = {
+        grn,
+        grnItems: lines,
+        gateEntry,
+        po,
+        supplier,
+        items: itemsById,
+        poItems: poItemRows,
+      };
+      const doc = generateGrnPdf(pdfData);
+      doc.save(`${grn.grnNumber}.pdf`);
+      toast({ variant: "success", title: "PDF downloaded" });
+    } catch (err) {
+      toast({
+        variant: "error",
+        title: "PDF generation failed",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  }
+
   if (!viewOk) {
     return (
       <AccessDenied
@@ -172,6 +216,13 @@ export default function GrnDetailPage() {
             <Link href="/inventory/grn">
               <Button variant="secondary">Back</Button>
             </Link>
+            <Button
+              variant="secondary"
+              onClick={() => void onDownloadPdf()}
+              disabled={isGeneratingPdf}
+            >
+              {isGeneratingPdf ? "Generating…" : "Download PDF"}
+            </Button>
             {canApprove && grn.status === "DRAFT" ? (
               <Button onClick={() => setConfirmOpen(true)} disabled={isMutating}>
                 Approve GRN

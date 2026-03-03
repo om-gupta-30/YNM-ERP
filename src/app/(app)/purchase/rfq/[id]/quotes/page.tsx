@@ -3,8 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import type { Item, RFQ, Supplier, SupplierQuote } from "@/lib/types";
-import { itemService, prService, supplierService } from "@/lib/services";
+import type { Item, RFQ, Supplier, SupplierQuote, SupplierItemPrice } from "@/lib/types";
+import { itemService, prService, supplierService, supplierItemPriceService } from "@/lib/services";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -50,6 +50,8 @@ export default function RfqQuotesPage() {
   const [prItemIds, setPrItemIds] = React.useState<string[]>([]);
 
   const [drafts, setDrafts] = React.useState<SupplierDraft[]>([]);
+  const [rateMasterPrices, setRateMasterPrices] = React.useState<SupplierItemPrice[]>([]);
+  const [autoFilled, setAutoFilled] = React.useState(false);
 
   const itemById = React.useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
 
@@ -75,25 +77,61 @@ export default function RfqQuotesPage() {
       setPrItemIds(itemIds);
       setQuotes(quoteList);
 
+      let rateCards: SupplierItemPrice[] = [];
+      try {
+        rateCards = await supplierItemPriceService.getForRfqAutoFill(
+          itemIds,
+          rfqData.selectedSuppliers,
+        );
+      } catch { /* rate master may not exist yet */ }
+      setRateMasterPrices(rateCards);
+
+      const rateMap = new Map<string, SupplierItemPrice>();
+      for (const rc of rateCards) {
+        rateMap.set(`${rc.supplierId}_${rc.itemId}`, rc);
+      }
+
+      let didAutoFill = false;
       setDrafts(rfqSuppliers.map((s) => {
         const existing = quoteList.find((q) => q.supplierId === s.id);
-        return {
-          supplierId: s.id,
-          rows: itemIds.map((itemId) => {
-            const prev = existing?.itemQuotes.find((x) => x.itemId === itemId);
+        const rows = itemIds.map((itemId) => {
+          const prev = existing?.itemQuotes.find((x) => x.itemId === itemId);
+          if (prev) {
             return {
               itemId,
-              unitPrice: prev ? String(prev.unitPrice) : "",
-              taxPercent: String(prev?.taxPercent ?? 18),
-              deliveryDays: String(prev?.deliveryDays ?? 7),
+              unitPrice: String(prev.unitPrice),
+              taxPercent: String(prev.taxPercent),
+              deliveryDays: String(prev.deliveryDays),
             };
-          }),
-          dirty: false,
+          }
+          const rate = rateMap.get(`${s.id}_${itemId}`);
+          if (rate) {
+            didAutoFill = true;
+            return {
+              itemId,
+              unitPrice: String(rate.unitPrice),
+              taxPercent: String(rate.taxPercent),
+              deliveryDays: String(rate.leadTimeDays),
+            };
+          }
+          return {
+            itemId,
+            unitPrice: "",
+            taxPercent: "18",
+            deliveryDays: "7",
+          };
+        });
+        const hasAutoFilled = !existing && rows.some((r) => r.unitPrice !== "");
+        return {
+          supplierId: s.id,
+          rows,
+          dirty: hasAutoFilled,
           saving: false,
-          editing: !existing,
+          editing: !existing || hasAutoFilled,
           error: null,
         };
       }));
+      setAutoFilled(didAutoFill);
     } catch (err) {
       toastRef.current({
         variant: "error",
@@ -238,6 +276,17 @@ export default function RfqQuotesPage() {
           </div>
         </div>
       </div>
+
+      {autoFilled && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-3">
+          <div className="flex items-center gap-2 text-sm text-emerald-800">
+            <svg className="size-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>
+              <strong>Auto-filled from Rate Master.</strong> Rates were pre-populated from your supplier price list. Review and save each supplier&apos;s quote.
+            </span>
+          </div>
+        </div>
+      )}
 
       {drafts.map((draft, draftIdx) => {
         const supplier = suppliers.find((s) => s.id === draft.supplierId);

@@ -176,6 +176,27 @@ export const authService = {
     return user;
   },
 
+  async signup(name: string, email: string, password: string): Promise<User> {
+    const { data, error } = await getSupabaseBrowserClient().auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error("Signup failed.");
+
+    const result = await fetchAppUser(data.user.id);
+    if (result.status !== "ok") {
+      throw new Error(
+        "Account created but ERP profile not provisioned yet. Contact your administrator.",
+      );
+    }
+
+    const factory =
+      (await resolveFactoryCode(result.row.factory_id)) ?? "YNM-HYD";
+    return buildUser(result.row, factory);
+  },
+
   async logout(): Promise<void> {
     removeKey(OVERRIDE_KEY);
     await getSupabaseBrowserClient().auth.signOut();

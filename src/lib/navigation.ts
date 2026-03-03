@@ -48,7 +48,25 @@ export const sidebarNav: NavItem[] = [
     section: "setup",
   },
 
+  {
+    label: "Rate Master",
+    href: "/masters/rate-card",
+    description: "Supplier-item price list",
+    icon: "tag",
+    roles: ["admin", "purchase"],
+    section: "setup",
+  },
+
   // ── OPERATIONS (admin sees all for oversight, other roles see their steps) ──
+  {
+    label: "Price Finder",
+    href: "/purchase/price-finder",
+    description: "L1/L2/L3 supplier ranking for any item",
+    icon: "search",
+    roles: ["admin", "purchase", "planning"],
+    section: "operations",
+    step: 0,
+  },
   {
     label: "Purchase Requisition",
     href: "/purchase/pr",

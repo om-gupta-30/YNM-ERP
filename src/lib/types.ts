@@ -329,6 +329,22 @@ export type BOMItem = {
   scrapPercentage: number;
 };
 
+export type SupplierItemPrice = {
+  id: string;
+  supplierId: string;
+  itemId: string;
+  unitPrice: number;
+  taxPercent: number;
+  leadTimeDays: number;
+  minOrderQty: number;
+  isActive: boolean;
+  effectiveFrom: string | null;
+  effectiveTo: string | null;
+  remarks: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type GetItemsParams = { delayMs?: number };
 export type GetSuppliersParams = { delayMs?: number };
 export type GetCustomersParams = { delayMs?: number };

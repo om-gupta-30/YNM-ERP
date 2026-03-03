@@ -13,4 +13,5 @@ export { productionService } from "./productionService";
 export { salesService } from "./salesService";
 export { auditService } from "./auditService";
 export { userService } from "./userService";
+export { supplierItemPriceService } from "./supplierItemPriceService";
 

@@ -32,6 +32,10 @@ export const can = {
   viewBOM:       (r: Role) => has(r, "admin", "planning", "production"),
   editBOM:       (r: Role) => has(r, "production"),
 
+  // ── Rate Master (Supplier-Item Prices) ───────────────────────────────
+  viewRateMaster: (r: Role) => has(r, "admin", "purchase"),
+  editRateMaster: (r: Role) => has(r, "purchase"),
+
   // ── Purchase Requisition ──────────────────────────────────────────────
   viewPR:        (r: Role) => has(r, "admin", "planning", "purchase"),
   createPR:      (r: Role) => has(r, "planning"),
