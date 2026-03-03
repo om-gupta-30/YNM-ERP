@@ -5,7 +5,6 @@ import type { Item, Supplier } from "@/lib/types";
 import type { RankedSupplier } from "@/lib/services/supplierItemPriceService";
 import { itemService, supplierService, supplierItemPriceService } from "@/lib/services";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/contexts/AuthContext";
 import { AccessDenied } from "@/components/ui/AccessDenied";

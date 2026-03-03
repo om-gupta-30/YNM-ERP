@@ -50,7 +50,7 @@ export default function RfqQuotesPage() {
   const [prItemIds, setPrItemIds] = React.useState<string[]>([]);
 
   const [drafts, setDrafts] = React.useState<SupplierDraft[]>([]);
-  const [rateMasterPrices, setRateMasterPrices] = React.useState<SupplierItemPrice[]>([]);
+  const [_rateMasterPrices, setRateMasterPrices] = React.useState<SupplierItemPrice[]>([]);
   const [autoFilled, setAutoFilled] = React.useState(false);
 
   const itemById = React.useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
